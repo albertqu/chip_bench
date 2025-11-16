@@ -100,7 +100,7 @@ class PowerSampler:
 #  GPU Benchmark (PyTorch + MPS)
 # ============================================================
 
-def benchmark_mps(steps=50, seq_len=512, hidden=1024 * 4, layers=10, batch=4):
+def benchmark_mps(steps=50, seq_len=512, hidden=1024, layers=10, batch=4):
 
     print("\n██████ GPU (MPS) BENCHMARK ██████")
 

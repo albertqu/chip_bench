@@ -5,7 +5,7 @@ import numpy as np
 def cpu_benchmark():
     """Test CPU performance with matrix operations"""
     print("Testing CPU Performance...")
-    size = 5000
+    size = 50000
     start = time.time()
     
     # Large matrix multiplication
