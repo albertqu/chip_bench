@@ -59,7 +59,7 @@ def run_mistral_quantized():
     
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
-        torch_dtype=torch.float32,  # Load in FP32 first
+        torch_dtype=torch.float16,  # Load in FP16 first
         low_cpu_mem_usage=True
     )
     

@@ -32,6 +32,108 @@ def download_gguf_model():
     print(f"\n✓ Model downloaded: {model_path}")
     return model_path
 
+#!/usr/bin/env python3
+# run_mistral_streaming.py
+
+import subprocess
+import os
+import time
+import psutil
+import sys
+
+def run_with_streaming_output(model_path, prompt):
+    """
+    Run inference with real-time output streaming
+    """
+    
+    print("=== Running Mistral 7B Q8_0 with GPU Acceleration ===\n")
+    
+    if not os.path.exists(model_path):
+        print(f"❌ Model not found: {model_path}")
+        return
+    
+    print(f"Model: {model_path}")
+    print(f"Quantization: Q8_0 (8-bit)")
+    print(f"Device: M1 Pro GPU (Metal)\n")
+    
+    mem_before = psutil.virtual_memory()
+    print(f"Memory before: {mem_before.used/1e9:.1f} GB / 16 GB\n")
+    
+    print("="*80)
+    print("INFERENCE OUTPUT (streaming)")
+    print("="*80 + "\n")
+    
+    start_time = time.time()
+    
+    # Create the command
+    cmd = [
+        "llama-cli",
+        "--model", model_path,
+        "--prompt", prompt,
+        "--n-gpu-layers", "33",
+        "--ctx-size", "2048",
+        "--n-predict", "1024",
+        "--temp", "0.7",
+        "--top-p", "0.9",
+        "--repeat-penalty", "1.1",
+        "--threads", "6",
+        "--batch-size", "512",
+        "--no-display-prompt",           # Don't show prompt echo
+        "--no-conversation" # skip interactive mode
+    ]
+    
+    # Run with streaming output (NO capture_output!)
+    # stdout and stderr go directly to terminal
+    process = subprocess.Popen(
+        cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        bufsize=1,  # Line buffered
+        universal_newlines=True
+    )
+    
+    # Collect output for later analysis
+    stdout_lines = []
+    stderr_lines = []
+    
+    # Stream stdout in real-time
+    try:
+        for line in process.stdout:
+            print(line, end='', flush=True)  # Print immediately
+            stdout_lines.append(line)
+    except KeyboardInterrupt:
+        process.kill()
+        print("\n\n⚠️  Interrupted by user")
+        return None
+    
+    # Get stderr after stdout is done
+    stderr_output = process.stderr.read()
+    stderr_lines = stderr_output.split('\n')
+    
+    # Wait for process to complete
+    process.wait()
+    
+    elapsed = time.time() - start_time
+    
+    print("\n" + "="*80)
+    print("PERFORMANCE METRICS")
+    print("="*80)
+    
+    # Parse performance info from stderr
+    for line in stderr_lines:
+        if any(keyword in line.lower() for keyword in ['eval time', 'prompt eval', 'llama_perf', 't/s', 'token']):
+            print(line)
+    
+    mem_after = psutil.virtual_memory()
+    
+    print(f"\nTotal time: {elapsed:.2f}s")
+    print(f"Memory used: {mem_after.used/1e9:.1f} GB / 16 GB")
+    print(f"GPU layers: 33")
+    
+    return ''.join(stdout_lines)
+    
+
 def run_llama_cpp_inference(model_path, prompt):
     """Run inference with llama.cpp"""
     
@@ -53,12 +155,15 @@ def run_llama_cpp_inference(model_path, prompt):
         "--top-p", "0.9",             # Nucleus sampling
         "--n-predict", "1024",        # Max tokens to generate
         "--threads", "8",             # Use all efficiency cores
-    ], capture_output=True, text=True, check=True)
+        "--no-display-prompt",           # Don't show prompt echo
+        "--no-conversation" # skip interactive mode
+
+    ], capture_output= True, text=True, check=True)
     
     elapsed = time.time() - start_time
     mem_after = psutil.virtual_memory()
     
-    print(result.stdout)
+    print(result.stderr)
     
     print("\n" + "="*80)
     print("PERFORMANCE METRICS")
@@ -95,7 +200,8 @@ Question: What is the expected number of cuts needed?
 Please solve this step-by-step, showing your mathematical reasoning."""
     
     # Run inference
-    response = run_llama_cpp_inference(model_path, prompt)
+    # response = run_llama_cpp_inference(model_path, prompt)
+    response = run_with_streaming_output(model_path, prompt)
     
     print("\n✅ Done!")
 

@@ -14,3 +14,6 @@
 #### Steps
 * install geekbench
 * run the relevant files in this directory for device history CPU benchmark GPU benchmark etc. 
+
+Reference performance (M4 pro):
+![alt text](image.png)

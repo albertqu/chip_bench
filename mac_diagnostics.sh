@@ -5,7 +5,12 @@ echo ""
 
 # System Info
 echo "--- System Information ---"
-system_profiler SPHardwareDataType | grep -E "Model|Chip|Memory|Serial"
+system_profiler SPHardwareDataType
+echo ""
+
+# GPU info
+echo "--- GPU Information ---"
+system_profiler SPDisplaysDataType | grep -E "GPU|Cores|Metal"
 echo ""
 
 # Battery Info
