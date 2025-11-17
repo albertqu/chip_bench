@@ -41,6 +41,16 @@ import time
 import psutil
 import sys
 
+def print_memory_usage(tag=None):
+    """Print current memory usage"""
+    mem = psutil.virtual_memory()
+    if tag is None:
+        tag = ''
+    else:
+        tag = f" ({tag})"
+    g = 1024 **3
+    print(f"Memory{tag}: {mem.used/g:.1f}GB / {mem.total/g:.1f}GB ({mem.percent:.1f}%)")
+
 def run_with_streaming_output(model_path, prompt):
     """
     Run inference with real-time output streaming
@@ -56,27 +66,28 @@ def run_with_streaming_output(model_path, prompt):
     print(f"Quantization: Q8_0 (8-bit)")
     print(f"Device: M1 Pro GPU (Metal)\n")
     
-    mem_before = psutil.virtual_memory()
-    print(f"Memory before: {mem_before.used/1e9:.1f} GB / 16 GB\n")
+    print_memory_usage(tag='before')
     
     print("="*80)
     print("INFERENCE OUTPUT (streaming)")
     print("="*80 + "\n")
     
     start_time = time.time()
+
+    gpu_layers = 35
     
     # Create the command
     cmd = [
         "llama-cli",
         "--model", model_path,
         "--prompt", prompt,
-        "--n-gpu-layers", "33",
+        "--n-gpu-layers", f"{gpu_layers}", # Offload layers to M1 GPU
         "--ctx-size", "2048",
         "--n-predict", "1024",
         "--temp", "0.7",
         "--top-p", "0.9",
         "--repeat-penalty", "1.1",
-        "--threads", "6",
+        "--threads", "8",  # Use all efficiency cores
         "--batch-size", "512",
         "--no-display-prompt",           # Don't show prompt echo
         "--no-conversation" # skip interactive mode
@@ -125,11 +136,8 @@ def run_with_streaming_output(model_path, prompt):
         if any(keyword in line.lower() for keyword in ['eval time', 'prompt eval', 'llama_perf', 't/s', 'token']):
             print(line)
     
-    mem_after = psutil.virtual_memory()
-    
-    print(f"\nTotal time: {elapsed:.2f}s")
-    print(f"Memory used: {mem_after.used/1e9:.1f} GB / 16 GB")
-    print(f"GPU layers: 33")
+    print_memory_usage(tag='after')
+    print(f"GPU layers: {gpu_layers}")
     
     return ''.join(stdout_lines)
     
