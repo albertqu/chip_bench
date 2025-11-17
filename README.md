@@ -8,8 +8,17 @@
 #### General installation
 1. install homebrew
 2. install miniconda
-3. install vscode (optional)
-4. install git
+3. install python packages
+```
+brew install llama.cpp # maybe also ollama later
+conda create --name llm
+conda install pip
+pip3 install numpy scipy psutil
+pip3 install --pre torch torchvision --index-url https://download.pytorch.org/whl/nightly/cpu
+pip3 transformers accelerate
+```
+4. install vscode (optional)
+5. install git
 
 #### Steps
 * install geekbench
