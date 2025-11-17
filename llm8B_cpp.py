@@ -50,6 +50,7 @@ def print_memory_usage(tag=None):
         tag = f" ({tag})"
     g = 1024 **3
     print(f"Memory{tag}: {mem.used/g:.1f}GB / {mem.total/g:.1f}GB ({mem.percent:.1f}%)")
+    return mem
 
 def run_with_streaming_output(model_path, prompt):
     """
@@ -66,7 +67,7 @@ def run_with_streaming_output(model_path, prompt):
     print(f"Quantization: Q8_0 (8-bit)")
     print(f"Device: M1 Pro GPU (Metal)\n")
     
-    print_memory_usage(tag='before')
+    mem_before = print_memory_usage(tag='before')
     
     print("="*80)
     print("INFERENCE OUTPUT (streaming)")
@@ -126,17 +127,19 @@ def run_with_streaming_output(model_path, prompt):
     process.wait()
     
     elapsed = time.time() - start_time
-    
-    print("\n" + "="*80)
-    print("PERFORMANCE METRICS")
-    print("="*80)
-    
+
     # Parse performance info from stderr
     for line in stderr_lines:
         if any(keyword in line.lower() for keyword in ['eval time', 'prompt eval', 'llama_perf', 't/s', 'token']):
             print(line)
     
-    print_memory_usage(tag='after')
+    print("\n" + "="*80)
+    print("PERFORMANCE METRICS")
+    print("="*80)
+    
+    print(f"Generation time: {elapsed:.2f}s")
+    mem_after = print_memory_usage(tag='after')
+    print(f"Memory used: {(mem_after.used - mem_before.used)/1e9:.1f} GiB")
     print(f"GPU layers: {gpu_layers}")
     
     return ''.join(stdout_lines)
