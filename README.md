@@ -23,6 +23,11 @@ pip3 transformers accelerate
 #### Steps
 * install geekbench
 * run the relevant files in this directory for device history CPU benchmark GPU benchmark etc. 
-
 Reference performance (M4 pro):
+* ~18 seconds for `llm8b_cpp.py`
 ![alt text](image.png)
+
+* Reference from previous M1 pro
+24 seconds with caching (55 from dry run)
+<img width="525" height="524" alt="Screenshot 2025-11-17 at 7 53 30 PM" src="https://github.com/user-attachments/assets/b68bfa10-f2ed-4b9f-b68a-6cd5abecb12a"/>
+
