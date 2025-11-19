@@ -15,7 +15,7 @@ conda create --name llm
 conda install pip
 pip3 install numpy scipy psutil
 pip3 install --pre torch torchvision --index-url https://download.pytorch.org/whl/nightly/cpu
-pip3 transformers accelerate
+pip3 install transformers accelerate
 ```
 4. install vscode (optional)
 5. install git
