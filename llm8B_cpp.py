@@ -157,7 +157,7 @@ def run_llama_cpp_inference(model_path, prompt):
     
     # Run llama.cpp with Metal (M1 GPU) acceleration
     result = subprocess.run([
-        "llama-cli",
+        "llama-completion",
         "--model", model_path,
         "--prompt", prompt,
         "--n-gpu-layers", "35",      # Offload layers to M1 GPU
