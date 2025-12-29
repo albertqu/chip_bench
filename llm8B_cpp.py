@@ -79,7 +79,7 @@ def run_with_streaming_output(model_path, prompt):
     
     # Create the command
     cmd = [
-        "llama-cli",
+        "llama-completion",
         "--model", model_path,
         "--prompt", prompt,
         "--n-gpu-layers", f"{gpu_layers}", # Offload layers to M1 GPU
